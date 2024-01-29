@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 require('dotenv').config();
 import express, {Request, Response} from 'express';
 import helmet from 'helmet';
@@ -13,6 +12,13 @@ import {
   ApolloServerPluginLandingPageLocalDefault,
   ApolloServerPluginLandingPageProductionDefault,
 } from '@apollo/server/plugin/landingPage/default';
+import {MyContext} from './local-types';
+import {authenticate} from './lib/functions';
+import {makeExecutableSchema} from '@graphql-tools/schema';
+import {
+  constraintDirectiveTypeDefs,
+  createApollo4QueryValidationPlugin,
+} from 'graphql-constraint-directive/apollo4';
 
 const app = express();
 
@@ -29,17 +35,32 @@ const app = express();
       res.send({message: 'Server is running'});
     });
 
-    const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  plugins: [
-    ApolloServerPluginLandingPageLocalDefault(),
-  ],
-});
+    // create executable schema for validation
+    const schema = makeExecutableSchema({
+      typeDefs: [constraintDirectiveTypeDefs, typeDefs],
+      resolvers,
+    });
+
+    const server = new ApolloServer<MyContext>({
+      schema,
+      plugins: [
+        createApollo4QueryValidationPlugin({schema}),
+        process.env.NODE_ENV === 'production'
+          ? ApolloServerPluginLandingPageProductionDefault()
+          : ApolloServerPluginLandingPageLocalDefault(),
+      ],
+    });
 
     await server.start();
 
-    app.use('/graphql', cors(), express.json(), expressMiddleware(server));
+    app.use(
+      '/graphql',
+      cors(),
+      express.json(),
+      expressMiddleware(server, {
+        context: ({req}) => authenticate(req),
+      }),
+    );
 
     app.use(notFound);
     app.use(errorHandler);
