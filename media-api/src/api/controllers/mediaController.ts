@@ -72,6 +72,11 @@ const mediaPost = async (
 ) => {
   try {
     // add user_id to media object from token
+    if (!res.locals.user || res.locals.user.user_id === undefined) {
+      const error = new CustomError('User ID not found', 400);
+      next(error);
+      return;
+    }
     req.body.user_id = res.locals.user.user_id;
     console.log(req.body);
     const newMedia = await postMedia(req.body);
