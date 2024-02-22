@@ -27,7 +27,10 @@ const getCountByMediaId = async (media_id: number): Promise<number> => {
   return rows[0].count;
 };
 
-const getUserLike = async (media_id: number, user_id: number): Promise<Like> => {
+const getUserLike = async (
+  media_id: number,
+  user_id: number
+): Promise<Like> => {
   const [rows] = await promisePool.execute<RowDataPacket[] & Like[]>(
     'SELECT * FROM likes WHERE media_id = ? AND user_id = ?',
     [media_id, user_id]

@@ -1,6 +1,11 @@
 // likeRoute.ts
 import express from 'express';
-import {likePost, likeDelete, likeCountGet, userLikeGet} from '../controllers/likeController';
+import {
+  likePost,
+  likeDelete,
+  likeCountGet,
+  userLikeGet,
+} from '../controllers/likeController';
 import {authenticate} from '../../middlewares';
 
 const router = express.Router();
