@@ -36,6 +36,10 @@ type UploadResponse = MessageResponse & {
   };
 };
 
+type LikeResponse = MessageResponse & {
+  like: Like;
+};
+
 export type {
   MessageResponse,
   ErrorResponse,
@@ -44,4 +48,5 @@ export type {
   UploadResponse,
   UserResponse,
   UserDeleteResponse,
+  LikeResponse,
 };
